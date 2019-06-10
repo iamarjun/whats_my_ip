@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TextView
-        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/widget_ip_address"
+        android:gravity="center"
+        tools:text="192.168.1.1"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 

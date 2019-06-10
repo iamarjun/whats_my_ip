@@ -33,6 +33,6 @@ class IPAddressProvider : AppWidgetProvider() {
 
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds)
 
-        context.startService(intent)
+        context.applicationContext.startService(intent)
     }
 }
