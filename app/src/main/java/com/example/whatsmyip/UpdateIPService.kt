@@ -29,7 +29,7 @@ class UpdateIPService : Service() {
 //        val ip = wifiInfo.ipAddress
 //        val ipAddress = Formatter.formatIpAddress(ip)
 
-        allWidgetIds!!.forEach { id ->
+        allWidgetIds?.forEach { id ->
             run {
                 val view = RemoteViews(applicationContext.packageName, R.layout.widget_whats_my_ip)
                 view.setTextViewText(R.id.widget_ip_address, detectNetwork())

@@ -27,11 +27,6 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
 
         refresh.setOnRefreshListener(this)
 
-        fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
-        }
-
         detectNetwork()
     }
 
@@ -66,14 +61,14 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
             if (netInfo.typeName.equals("WIFI", ignoreCase = true))
 
                 if (netInfo.isConnected) {
-                    ip_address.text = "WiFi IP Address ${getDeviceIPAddressForWifi()}"
+                    ip_address.text = "${getDeviceIPAddressForWifi()}"
                     refresh.isRefreshing = false
                 }
 
             if (netInfo.typeName.equals("MOBILE", ignoreCase = true))
 
                 if (netInfo.isConnected) {
-                    ip_address.text = "Cellular Network IP Address ${getDeviceIPAddress(true)}"
+                    ip_address.text = "${getDeviceIPAddress(true)}"
                     refresh.isRefreshing = false
                 }
         }
