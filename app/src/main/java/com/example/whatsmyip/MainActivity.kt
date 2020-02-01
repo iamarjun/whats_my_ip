@@ -44,13 +44,13 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
             if (netInfo.typeName.equals("WIFI", ignoreCase = true))
 
                 if (netInfo.isConnected) {
-                    ip_address.text = "WiFi IP Address ${getDeviceIPAddressForWifi()}"
+                    ip_address.text = getDeviceIPAddressForWifi()
                 }
 
             if (netInfo.typeName.equals("MOBILE", ignoreCase = true))
 
                 if (netInfo.isConnected) {
-                    ip_address.text = "Cellular Network IP Address ${getDeviceIPAddress(true)}"
+                    ip_address.text = getDeviceIPAddress(true)
                 }
         }
     }
