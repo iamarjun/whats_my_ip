@@ -10,11 +10,35 @@
             android:id="@+id/ip_address"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="192.168.1.1" />
+
+    <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:textAlignment="center"
+            app:layout_constraintEnd_toEndOf="@+id/ip_address"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/ip_address"
+            app:layout_constraintTop_toBottomOf="@+id/ip_address"
+            tools:text="Text here" />
+
+    <ImageView
+            android:id="@+id/wifi_off_icon"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginTop="16dp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="@+id/ip_address"
+            app:layout_constraintStart_toStartOf="@+id/ip_address"
+            app:layout_constraintTop_toBottomOf="@id/textView"
+            app:srcCompat="@drawable/ic_signal_wifi_off_black_24dp"
+            tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

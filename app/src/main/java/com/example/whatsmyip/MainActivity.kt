@@ -1,116 +1,90 @@
 package com.example.whatsmyip
 
-import android.annotation.SuppressLint
-import android.content.Context
-import android.net.ConnectivityManager
-import android.net.wifi.WifiManager
 import android.os.Bundle
-import android.text.format.Formatter
-import android.view.Menu
-import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.example.network.Event
+import com.example.network.NetworkEvents
+import com.example.network.NetworkState
+import com.example.network.NetworkStateHolder
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
-import java.net.Inet4Address
-import java.net.NetworkInterface
-import java.util.*
+import org.apache.commons.validator.routines.InetAddressValidator
 
 
 class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
+
+    private var previousSate = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
+        savedInstanceState?.let {
+            previousSate = it.getBoolean("LOST_CONNECTION")
+        }
+
         refresh.setOnRefreshListener(this)
 
-        detectNetwork()
-    }
+        wifi_off_icon.visibility = if (!NetworkStateHolder.isConnected) View.VISIBLE else View.GONE
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.menu_main, menu)
-        return true
-    }
+        NetworkEvents.observe(this, Observer {
+            if (it is Event.ConnectivityEvent)
+                handleConnectivityChange(it.state)
+        })
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        return when (item.itemId) {
-            R.id.action_settings -> true
-            else -> super.onOptionsItemSelected(item)
-        }
     }
 
     override fun onRefresh() {
-        detectNetwork()
+        handleConnectivityChange(NetworkStateHolder)
     }
 
-    private fun detectNetwork() {
-
-        val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
-        val networkInfo = cm.allNetworkInfo
-
-        for (netInfo in networkInfo) {
-
-            if (netInfo.typeName.equals("WIFI", ignoreCase = true))
-
-                if (netInfo.isConnected) {
-                    ip_address.text = "${getDeviceIPAddressForWifi()}"
-                    refresh.isRefreshing = false
-                }
-
-            if (netInfo.typeName.equals("MOBILE", ignoreCase = true))
-
-                if (netInfo.isConnected) {
-                    ip_address.text = "${getDeviceIPAddress(true)}"
-                    refresh.isRefreshing = false
-                }
-        }
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putBoolean("LOST_CONNECTION", previousSate)
+        super.onSaveInstanceState(outState)
     }
 
-    @SuppressLint("DefaultLocale")
-    private fun getDeviceIPAddress(useIPv4: Boolean): String {
-        try {
-            val networkInterfaces = Collections.list(NetworkInterface.getNetworkInterfaces())
-            for (networkInterface in networkInterfaces) {
-                val inetAddresses = Collections.list(networkInterface.inetAddresses)
-                for (inetAddress in inetAddresses) {
-                    if (!inetAddress.isLoopbackAddress) {
-                        val sAddr = inetAddress.hostAddress.toUpperCase()
-                        val isIPv4 = inetAddress is Inet4Address
-                        if (useIPv4) {
-                            if (isIPv4)
-                                return sAddr
-                        } else {
-                            if (!isIPv4) {
-                                // drop ip6 port suffix
-                                val delim = sAddr.indexOf('%')
-                                return if (delim < 0) sAddr else sAddr.substring(0, delim)
-                            }
-                        }
-                    }
-                }
+    private fun handleConnectivityChange(networkState: NetworkState) {
+        refresh.isRefreshing = false
+
+        if (networkState.isConnected) {
+            showSnackBar(textView, "The network is back !")
+            wifi_off_icon.visibility = View.GONE
+
+            networkState.linkProperties?.linkAddresses?.let {
+                for (address in it)
+                    if (InetAddressValidator.getInstance().isValidInet4Address(address.toString().substringBefore("/")))
+                        ip_address.text = address.toString().substringBefore("/")
+
             }
-        } catch (ex: Exception) {
-            ex.printStackTrace()
         }
 
-        return ""
+        if (!networkState.isConnected) {
+            showSnackBar(textView, "No Network !")
+            wifi_off_icon.visibility = View.VISIBLE
+        }
+
+        previousSate = networkState.isConnected
     }
 
-    private fun getDeviceIPAddressForWifi(): String {
-        val wifiMgr = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
-        val wifiInfo = wifiMgr.connectionInfo
-        val ip = wifiInfo.ipAddress
-        val ipAddress = Formatter.formatIpAddress(ip)
-
-        return ipAddress
+    override fun onResume() {
+        super.onResume()
+        handleConnectivityChange(NetworkStateHolder)
     }
 
+    private fun showSnackBar(view: View, text: String) {
+        val snackbar = Snackbar.make(
+            view,
+            text,
+            Snackbar.LENGTH_LONG
+        )
+        snackbar.setAction("Close") {
+            snackbar.dismiss()
+        }
+        snackbar.show()
+    }
 }
